@@ -79,6 +79,37 @@ The cache is not a source of new authority. Each entry must be bound to the poli
 
 Allow entries require particular care because stale permission can preserve revoked access. Deny entries can also cause material availability impact. Cache behavior therefore needs explicit maximum age, provenance, integrity protection, invalidation, revocation handling, negative-cache policy, and observability.
 
+## Capability-Specific Latency Model
+
+Axion should not treat “AI latency” as one homogeneous budget. A general-purpose reasoning model is unlikely to return a useful, structured risk assessment within a hard 150 ms end-to-end deadline once network transit, queueing, context assembly, inference, parsing, and deterministic arbitration are included. First-token latency is not equivalent to a completed decision contribution.
+
+A 150 ms target may be appropriate as a **fast-path decision service-level objective for selected capabilities**. It should not be described as the general AI deadline. Heavyweight reasoning may contribute when it completes within the applicable window, but safe fast-path enforcement must not depend on it.
+
+Different work belongs in different approximate timing bands:
+
+| Illustrative elapsed time | Candidate work |
+|---|---|
+| 0–10 ms | Local cache lookup, signature validation, hard policy evaluation, and locally available revocation checks |
+| 10–50 ms | Enterprise Capability Graph lookup, behavioral feature retrieval, and lightweight deterministic or statistical scoring |
+| 50–250 ms | Compact or specialized local or regional models, where justified and available |
+| 250 ms–2 s | Richer regional reasoning and multi-source correlation |
+| Seconds or longer | Deep correlation, global reasoning, investigation, simulation, and human review |
+
+These ranges are hypotheses for architecture and testing, not performance commitments. Deployment topology, provider behavior, workload, context size, arbitration, and network conditions may change them materially.
+
+The permitted decision budget belongs to the capability and policy, not to Axion as one global setting. For example, `sharepoint.read.document` might use a 30 ms fast-path budget with a short-lived constrained allow, while `entra.assign.global-admin` might permit two seconds of required reasoning and still require another control such as step-up authentication, separation of duties, or human approval.
+
+Capability-specific policy should define:
+
+- the fast-path decision SLO;
+- which deterministic and reasoning inputs are required within that path;
+- whether asynchronous reasoning may continue after an initial decision;
+- the scope, lifetime, and reversibility of any initial authority;
+- the maximum time before a later decision must be enforced; and
+- behavior when each required tier is late or unavailable.
+
+This model allows fast local enforcement for bounded actions without forcing every reasoning task into an unrealistic synchronous deadline.
+
 ## Escalation Model
 
 Requests escalate **edge → regional → global** when local handling lacks sufficient authority or context. Escalation criteria may include:
@@ -89,6 +120,8 @@ Requests escalate **edge → regional → global** when local handling lacks suf
 - **latency requirements:** the request can tolerate escalation, or conversely requires a predefined local fail behavior when escalation cannot complete in time.
 
 Escalation is not a mechanism for seeking a more permissive answer. Higher tiers may add context, require stronger obligations, or determine that the action cannot proceed. The deterministic policy model must define which tier is authoritative for each decision class and how contradictory or stale state is handled.
+
+Escalation need not block completion of every low-risk request. Where capability policy permits it, the edge may issue an initial constrained decision while regional or global reasoning continues asynchronously. A later result can tighten future decisions or revoke unused authority, but it cannot make an irreversible completed effect safe after the fact.
 
 ## Conceptual Architecture
 
@@ -154,6 +187,8 @@ These assumptions require validation. If one does not hold for a deployment, the
 
 - What decision latency is required for API calls, interactive agents, CI/CD controls, incident response, and long-running automation?
 - Which actions may wait for regional or global reasoning, and which must use a bounded local decision or deny?
+- Which capabilities justify a fast-path decision SLO near 150 ms, and what work can reliably complete inside it?
+- How should end-to-end budgets account for context assembly, inference, parsing, arbitration, and enforcement rather than only model response time?
 
 ### Cache invalidation and revocation
 
