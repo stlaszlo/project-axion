@@ -1,0 +1,58 @@
+flowchart LR
+    subgraph Sources["Initiating actors"]
+        Human["Human"]
+        Service["Service"]
+    end
+
+    Identity["Identity and intent"]
+
+    subgraph Reasoning["Probabilistic reasoning domain"]
+        Agent["Agent runtime"]
+        LLM["LLM / model"]
+        Context["Memory / RAG context"]
+        Agent <--> LLM
+        Context --> Agent
+    end
+
+    subgraph Axion["Axion control boundary"]
+        Validate["Schema and capability validation"]
+        PEP["Policy enforcement point"]
+        PDP["Deterministic policy decision point"]
+        Approval["Human approval"]
+        Broker["Tool / API broker"]
+
+        Validate --> PEP
+        PEP <--> PDP
+        PEP <--> Approval
+        PEP --> Broker
+    end
+
+    subgraph Targets["Enterprise systems"]
+        API["Enterprise APIs"]
+        SaaS["SaaS services"]
+        LocalTool["Constrained local tools"]
+    end
+
+    Audit["Audit and telemetry"]
+    ControlPlane["Identity, policy, capability and revocation administration"]
+
+    Human --> Identity
+    Service --> Identity
+    Identity --> Agent
+    Agent -->|"Untrusted action proposal"| Validate
+    Broker --> API
+    Broker --> SaaS
+    Broker --> LocalTool
+    API --> Broker
+    SaaS --> Broker
+    LocalTool --> Broker
+    Broker -->|"Constrained result"| Agent
+
+    ControlPlane -.-> PDP
+    ControlPlane -.-> Broker
+    Identity --> Audit
+    Agent --> Audit
+    PDP --> Audit
+    Approval --> Audit
+    Broker --> Audit
+    Targets --> Audit

@@ -1,0 +1,53 @@
+flowchart TB
+    subgraph B0["Boundary 1 — Intent and context"]
+        Input["Human, service, retrieved data, memory"]
+    end
+
+    subgraph B1["Untrusted reasoning domain"]
+        Runtime["Agent runtime"]
+        Model["Model"]
+        Runtime <--> Model
+    end
+
+    subgraph B2["Boundary 2 — Reasoning to action"]
+        Proposal["Structured action proposal\nNo authority"]
+    end
+
+    subgraph B3["Boundary 3 — Authorization"]
+        Identity["Identity and delegation validation"]
+        Policy["Deterministic policy decision"]
+        Approval["Bound human approval, when required"]
+        Enforcement["Policy enforcement"]
+        Identity --> Policy
+        Policy --> Enforcement
+        Approval --> Enforcement
+    end
+
+    subgraph B4["Boundary 4 — Execution"]
+        Broker["Capability broker"]
+        Credential["Short-lived scoped credential"]
+        Credential --> Broker
+    end
+
+    subgraph B5["Boundary 5 — External system"]
+        Target["API, SaaS, MCP server, or local tool"]
+    end
+
+    subgraph B6["Boundary 6 — Evidence"]
+        Audit["Protected audit and telemetry"]
+    end
+
+    Input --> Runtime
+    Runtime --> Proposal
+    Proposal --> Identity
+    Enforcement --> Broker
+    Broker <--> Target
+    Target -->|"Untrusted result"| Broker
+    Broker -->|"Released result"| Runtime
+
+    Input -.-> Audit
+    Runtime -.-> Audit
+    Policy -.-> Audit
+    Approval -.-> Audit
+    Broker -.-> Audit
+    Target -.-> Audit
