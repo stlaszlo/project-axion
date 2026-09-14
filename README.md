@@ -46,7 +46,7 @@ Audit and Telemetry
 
 The Axion control boundary mediates the transition from a proposed action to an action carrying real-world authority. It validates identity and delegation, obtains a deterministic policy decision, applies approval requirements, issues or uses narrowly scoped credentials, invokes the selected capability, and records the result.
 
-See [architecture.md](architecture.md) for the component model and request flows, and [diagrams/README.md](diagrams/README.md) for Mermaid sources.
+See the [shareable overall architecture](diagrams/overall-architecture.md), [architecture.md](architecture.md) for the detailed component model and request flows, and [diagrams/README.md](diagrams/README.md) for Mermaid sources.
 
 ## Design Principles
 

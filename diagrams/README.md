@@ -4,6 +4,8 @@ This directory contains Mermaid source files for the conceptual architecture. Th
 
 ## Files
 
+- [overall-architecture.md](overall-architecture.md) — shareable, GitHub-renderable overview of the complete Axion architecture.
+- [overall-architecture.mmd](overall-architecture.mmd) — standalone Mermaid source for the overview.
 - [architecture.mmd](architecture.mmd) — principal actors and the end-to-end control flow.
 - [trust-boundaries.mmd](trust-boundaries.mmd) — the boundaries crossed as intent becomes an authorized external action and evidence is recorded.
 
@@ -12,6 +14,7 @@ This directory contains Mermaid source files for the conceptual architecture. Th
 Render with any Mermaid-compatible viewer or CLI. For example:
 
 ```sh
+mmdc -i diagrams/overall-architecture.mmd -o overall-architecture.svg
 mmdc -i diagrams/architecture.mmd -o architecture.svg
 mmdc -i diagrams/trust-boundaries.mmd -o trust-boundaries.svg
 ```

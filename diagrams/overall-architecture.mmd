@@ -1,0 +1,75 @@
+flowchart TB
+    subgraph Actors["Actors and autonomous systems"]
+        Human["Human"]
+        Service["Service"]
+        Agent["Agent / LLM\nProbabilistic reasoning"]
+        Human --> Agent
+        Service --> Agent
+    end
+
+    subgraph Axion["Axion — policy and trust orchestration"]
+        direction TB
+
+        subgraph Enforcement["Enforcement Plane — inline"]
+            Edge["Edge Gateway\nIdentity + request validation"]
+            Policy["Deterministic Policy\nAllow · restrict · approve · deny"]
+            Grant["Intent-Bound Capability\nShort-lived scoped grant"]
+            Broker["Capability / Tool Broker"]
+
+            Edge --> Policy
+            Policy --> Grant
+            Grant --> Broker
+        end
+
+        subgraph TelemetryPlane["Telemetry Plane — inline + out-of-path"]
+            Observe["Trusted observations\nIdentity · behavior · performance · security"]
+            ECG["Enterprise Capability Graph\nEntities · relationships · baselines · outcomes"]
+            Observe --> ECG
+        end
+
+        subgraph Reasoning["Reasoning Plane — advisory"]
+            Regional["Regional Reasoning\nFast context + correlation"]
+            GlobalReasoning["Global Reasoning\nCross-region analysis + investigation"]
+            Regional <--> GlobalReasoning
+        end
+
+        subgraph Control["Control Plane"]
+            Core["Global Axion Core\nPolicy · identity trust · capabilities · revocation"]
+            HumanControl["Human Authority\nApproval · interruption · recovery"]
+        end
+
+        ECG --> Regional
+        ECG --> GlobalReasoning
+        Regional -->|"Evidence + uncertainty"| Policy
+        GlobalReasoning -->|"Evidence + uncertainty"| Policy
+        Core -->|"Signed control state"| Policy
+        Core -->|"Governed configuration"| Edge
+        HumanControl -->|"Bound approval / override"| Policy
+    end
+
+    subgraph Enterprise["Existing enterprise controls and systems"]
+        Controls["IAM · PAM · SIEM · EDR · DLP\nAPI Gateways · CI/CD · Cloud Security"]
+        Capabilities["APIs · SaaS · MCP Servers · Tools\nData Stores · Vector Databases · Workflows"]
+        Outcomes["Business Outcomes"]
+        Controls --> Capabilities
+        Capabilities --> Outcomes
+    end
+
+    Audit["Immutable decision-chain audit\nActor → intent → policy → grant → invocation → outcome"]
+
+    Agent -->|"Untrusted intent / action proposal"| Edge
+    Broker -->|"Constrained invocation"| Capabilities
+    Capabilities -->|"Result"| Broker
+    Broker -->|"Policy-filtered result"| Agent
+
+    Controls -.->|"Telemetry"| Observe
+    Capabilities -.->|"Telemetry"| Observe
+    Outcomes -.->|"Outcome evidence"| Observe
+    Edge -.->|"Requests + decisions"| Observe
+
+    Edge -.-> Audit
+    Policy -.-> Audit
+    Grant -.-> Audit
+    Broker -.-> Audit
+    HumanControl -.-> Audit
+    Outcomes -.-> Audit
